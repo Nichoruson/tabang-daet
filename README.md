@@ -47,39 +47,10 @@ On Windows PowerShell, if `npm` is blocked:
 npm.cmd run dev
 ```
 
-## Deploy to Vercel (recommended)
 
-1. Push this repo to GitHub (see below).
-2. Go to [vercel.com/new](https://vercel.com/new).
-3. **Import** your GitHub repository.
-4. Framework preset: **Next.js** (auto-detected).
-5. Click **Deploy** — no env vars required for the demo.
 
-Optional: add `TABANG_USE_MEMORY=1` in Vercel env to force in-memory storage locally.
 
-## Push to GitHub
-
-```bash
-git init
-git add .
-git commit -m "Initial commit: Tabang Daet emergency reporting system"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/tabang-daet.git
-git push -u origin main
-```
-
-Create the empty repo first on GitHub: **New repository** → name `tabang-daet` → do not add README.
-
-## Project structure
-
-```
-src/app/          # Pages (citizen, dispatcher, responder)
-src/app/api/      # Incident REST API
-src/components/   # Map, shell, login UI
-src/lib/          # Business logic, triage, persistence
-data/             # Local incident JSON (dev only)
-```
 
 ## Author
 
-Rue Martine Nicholson A. Abando — BSIT 2B
+Rue Martine Nicholson A. Abando 
