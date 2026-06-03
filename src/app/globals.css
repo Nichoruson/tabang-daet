@@ -1,0 +1,74 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --bg-base: #0a0f1a;
+  --bg-panel: #111827;
+  --bg-elevated: #1a2332;
+  --border-emergency: #3d4f6f;
+  --text-primary: #f1f5f9;
+  --text-muted: #94a3b8;
+  --alert-red: #dc2626;
+  --alert-amber: #d97706;
+  --alert-green: #059669;
+  --accent-command: #1e40af;
+}
+
+@theme inline {
+  --color-background: var(--bg-base);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(220, 38, 38, 0.35);
+}
+
+.leaflet-container {
+  background: #0f172a !important;
+  font-family: inherit;
+}
+
+.emergency-grid-bg {
+  background-color: var(--bg-base);
+  background-image:
+    linear-gradient(rgba(220, 38, 38, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220, 38, 38, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@keyframes pulse-alert {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.pulse-alert {
+  animation: pulse-alert 1.5s ease-in-out infinite;
+}
