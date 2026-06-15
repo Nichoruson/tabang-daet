@@ -47,6 +47,7 @@ On Windows PowerShell, if `npm` is blocked:
 npm.cmd run dev
 ```
 
+<<<<<<< HEAD
 ## Database & OTP Configuration
 
 The application uses **Prisma ORM** with **PostgreSQL** (e.g. Supabase, Neon, or Vercel Postgres) for persistence.
@@ -80,30 +81,12 @@ npx prisma migrate dev --name init
 4. Framework preset: **Next.js** (auto-detected).
 5. Add your environment variables (`DATABASE_URL`, and optionally Twilio keys) in the Vercel project settings.
 6. Click **Deploy**.
+=======
 
-## Push to GitHub
 
-```bash
-git init
-git add .
-git commit -m "Initial commit: Tabang Daet emergency reporting system"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/tabang-daet.git
-git push -u origin main
-```
+>>>>>>> 6a783224e93eacfd7a00a284b8fe292670538a21
 
-Create the empty repo first on GitHub: **New repository** → name `tabang-daet` → do not add README.
-
-## Project structure
-
-```
-src/app/          # Pages (citizen, dispatcher, responder)
-src/app/api/      # Incident REST API
-src/components/   # Map, shell, login UI
-src/lib/          # Business logic, triage, persistence
-data/             # Local incident JSON (dev only)
-```
 
 ## Author
 
-Rue Martine Nicholson A. Abando — BSIT 2B
+Rue Martine Nicholson A. Abando 
