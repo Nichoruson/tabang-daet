@@ -3,6 +3,7 @@
 import { AppShell } from "@/components/AppShell";
 import { createIncident } from "@/lib/api-client";
 import {
+  clearSession,
   createCitizenSession,
   loadSession,
   saveSession,
@@ -306,13 +307,32 @@ export default function CitizenPage() {
 
   return (
     <AppShell role="Citizen" badge={session.name} online={online}>
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Emergency report</h1>
           <p className="mt-1 text-sm text-slate-400">
             {getCitizenDemoStateLabel(!!activeReport)}
             {queueCount > 0 ? ` · ${queueCount} queued offline` : ""}
           </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            clearSession();
+            setSession(null);
+            setOtpSent(false);
+            setOtp("");
+            setDevOtp(null);
+            setActiveReport(null);
+          }}
+          className="text-xs text-slate-500 hover:text-red-300"
+        >
+          Sign out
+        </button>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div>
 
           {!activeReport ? (
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">

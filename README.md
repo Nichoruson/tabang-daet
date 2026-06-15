@@ -47,7 +47,6 @@ On Windows PowerShell, if `npm` is blocked:
 npm.cmd run dev
 ```
 
-<<<<<<< HEAD
 ## Database & OTP Configuration
 
 The application uses **Prisma ORM** with **PostgreSQL** (e.g. Supabase, Neon, or Vercel Postgres) for persistence.
@@ -81,10 +80,6 @@ npx prisma migrate dev --name init
 4. Framework preset: **Next.js** (auto-detected).
 5. Add your environment variables (`DATABASE_URL`, and optionally Twilio keys) in the Vercel project settings.
 6. Click **Deploy**.
-=======
-
-
->>>>>>> 6a783224e93eacfd7a00a284b8fe292670538a21
 
 
 ## Author
