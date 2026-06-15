@@ -13,7 +13,38 @@ import {
 import { useIncidents } from "@/hooks/useIncidents";
 import type { IncidentReport, IncidentStatus } from "@/lib/types";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+function playResponderChime() {
+  if (typeof window === "undefined") return;
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+
+    // Sound generation: alarm siren sound (two oscillating sweeps)
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(440, ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(880, ctx.currentTime + 0.3);
+    osc.frequency.linearRampToValueAtTime(440, ctx.currentTime + 0.6);
+    osc.frequency.linearRampToValueAtTime(880, ctx.currentTime + 0.9);
+
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2);
+
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 1.2);
+  } catch (e) {
+    console.error("Audio Context error:", e);
+  }
+}
 
 const Map = dynamic(
   () => import("@/components/EmergencyMap").then((m) => m.EmergencyMap),
@@ -40,6 +71,17 @@ export default function ResponderPage() {
   const { incidents, online, refresh } = useIncidents();
   const [currentStage, setCurrentStage] = useState(1);
   const [busy, setBusy] = useState(false);
+  const lastAssignmentId = useRef<string | null>(null);
+  const [toast, setToast] = useState<{ id: string; msg: string } | null>(null);
+
+  // Request notifications permission when authed
+  useEffect(() => {
+    if (authed && typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    }
+  }, [authed]);
 
   useEffect(() => {
     setAuthed(requireRole(loadSession(), "responder"));
@@ -52,6 +94,40 @@ export default function ResponderPage() {
       ) ?? incidents.find((i) => i.status === "validated") ?? null,
     [incidents],
   );
+
+  // Monitor assignments and trigger alerts on new ones
+  useEffect(() => {
+    if (!assignment) {
+      lastAssignmentId.current = null;
+      return;
+    }
+
+    // First load: just set the current ID so we don't alert old assignments
+    if (lastAssignmentId.current === null) {
+      lastAssignmentId.current = assignment.id;
+      return;
+    }
+
+    // New assignment detected
+    if (assignment.id !== lastAssignmentId.current) {
+      lastAssignmentId.current = assignment.id;
+      playResponderChime();
+
+      const msg = `New Assignment: Dispatched to a ${assignment.category.toUpperCase()} emergency at ${assignment.landmark || "GPS location"}.`;
+      setToast({ id: assignment.id, msg });
+
+      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        try {
+          new Notification("🚑 New Incident Assignment!", {
+            body: `Description: ${assignment.description}`,
+            tag: assignment.id,
+          });
+        } catch (err) {
+          console.error("Failed to show desktop notification:", err);
+        }
+      }
+    }
+  }, [assignment]);
 
   const milestones = [
     "Assignment Accepted",
@@ -93,6 +169,23 @@ export default function ResponderPage() {
 
   return (
     <AppShell role="Field unit" online={online}>
+      {toast ? (
+        <div className="mb-4 flex items-center justify-between rounded-xl border border-amber-500 bg-amber-950/80 px-4 py-3 text-white animate-pulse">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🚑</span>
+            <div>
+              <p className="text-sm font-bold">{toast.msg}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-slate-400 hover:text-white text-lg font-bold ml-4"
+          >
+            &times;
+          </button>
+        </div>
+      ) : null}
       <div className="mb-6 flex justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Field response</h1>

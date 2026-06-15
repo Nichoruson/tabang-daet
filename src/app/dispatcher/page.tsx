@@ -14,7 +14,42 @@ import { severityAccent, statusAccent } from "@/lib/triage";
 import { useIncidents } from "@/hooks/useIncidents";
 import type { IncidentReport, IncidentStatus } from "@/lib/types";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+function playEmergencyChime() {
+  if (typeof window === "undefined") return;
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+
+    // Sound generation: dual frequency alarm sweep
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    osc1.type = "sine";
+    osc2.type = "sine";
+
+    osc1.frequency.setValueAtTime(880, ctx.currentTime);
+    osc2.frequency.setValueAtTime(1200, ctx.currentTime);
+
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2);
+
+    osc1.connect(gainNode);
+    osc2.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    osc1.start();
+    osc2.start();
+    osc1.stop(ctx.currentTime + 1.2);
+    osc2.stop(ctx.currentTime + 1.2);
+  } catch (e) {
+    console.error("Audio Context error:", e);
+  }
+}
 
 const Map = dynamic(
   () => import("@/components/EmergencyMap").then((m) => m.EmergencyMap),
@@ -28,6 +63,63 @@ export default function DispatcherPage() {
   const { incidents, loading, online, refresh } = useIncidents();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const seenIds = useRef<Set<string>>(new Set());
+  const [toast, setToast] = useState<{ id: string; msg: string } | null>(null);
+
+  // Request notifications permission when authed
+  useEffect(() => {
+    if (authed && typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    }
+  }, [authed]);
+
+  // Track incidents and detect new pending ones
+  useEffect(() => {
+    if (loading) return;
+    if (!incidents.length) {
+      seenIds.current.clear();
+      return;
+    }
+
+    // First load: populate seenIds so we don't alert old incidents
+    if (seenIds.current.size === 0) {
+      incidents.forEach((i) => seenIds.current.add(i.id));
+      return;
+    }
+
+    // Find new pending incidents
+    let hasNewPending = false;
+    let newIncident: IncidentReport | null = null;
+
+    for (const i of incidents) {
+      if (!seenIds.current.has(i.id)) {
+        seenIds.current.add(i.id);
+        if (i.status === "pending") {
+          hasNewPending = true;
+          newIncident = i;
+        }
+      }
+    }
+
+    if (hasNewPending && newIncident) {
+      playEmergencyChime();
+      const msg = `New ${newIncident!.category.toUpperCase()} emergency report received from ${newIncident!.reporterName}!`;
+      setToast({ id: newIncident!.id, msg });
+
+      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        try {
+          new Notification("🚨 Emergency Report!", {
+            body: msg,
+            tag: newIncident!.id,
+          });
+        } catch (err) {
+          console.error("Failed to show desktop notification:", err);
+        }
+      }
+    }
+  }, [incidents, loading]);
 
   useEffect(() => {
     const session = loadSession();
@@ -74,6 +166,33 @@ export default function DispatcherPage() {
 
   return (
     <AppShell role="Dispatcher" online={online}>
+      {toast ? (
+        <div className="mb-4 flex items-center justify-between rounded-xl border border-red-500 bg-red-950/80 px-4 py-3 text-white animate-pulse">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🚨</span>
+            <div>
+              <p className="text-sm font-bold">{toast.msg}</p>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setSelectedId(toast.id);
+                  setToast(null);
+                }}
+                className="text-xs text-red-300 underline font-semibold mt-0.5"
+              >
+                View Incident Details
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-slate-400 hover:text-white text-lg font-bold ml-4"
+          >
+            &times;
+          </button>
+        </div>
+      ) : null}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Command dashboard</h1>

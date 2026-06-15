@@ -47,15 +47,39 @@ On Windows PowerShell, if `npm` is blocked:
 npm.cmd run dev
 ```
 
+## Database & OTP Configuration
+
+The application uses **Prisma ORM** with **PostgreSQL** (e.g. Supabase, Neon, or Vercel Postgres) for persistence.
+
+### 1. Environment Variables (`.env`)
+Create a `.env` file in the root directory:
+
+```env
+# Database connection string (e.g., from Supabase or Neon)
+DATABASE_URL="postgresql://username:password@hostname:5432/dbname?schema=public"
+
+# Twilio SMS credentials (optional - fellback to console log in development)
+TWILIO_ACCOUNT_SID="your_account_sid"
+TWILIO_AUTH_TOKEN="your_auth_token"
+TWILIO_PHONE_NUMBER="+1xxxxxxxxxx"
+```
+
+### 2. Local Database & Migrations
+To initialize the database schema, run:
+```bash
+npx prisma migrate dev --name init
+```
+
+*Note: For local-only development without PostgreSQL, you can change the provider to `sqlite` and url to `file:./dev.db` in `prisma/schema.prisma` and run `npx prisma migrate dev`.*
+
 ## Deploy to Vercel (recommended)
 
 1. Push this repo to GitHub (see below).
 2. Go to [vercel.com/new](https://vercel.com/new).
 3. **Import** your GitHub repository.
 4. Framework preset: **Next.js** (auto-detected).
-5. Click **Deploy** — no env vars required for the demo.
-
-Optional: add `TABANG_USE_MEMORY=1` in Vercel env to force in-memory storage locally.
+5. Add your environment variables (`DATABASE_URL`, and optionally Twilio keys) in the Vercel project settings.
+6. Click **Deploy**.
 
 ## Push to GitHub
 

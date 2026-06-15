@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         String     @id @default(uuid())
+  name       String
+  phone      String     @unique
+  role       String     // "citizen" | "dispatcher" | "responder"
+  authMethod String     // "phone" | "google"
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  incidents  Incident[]
+}
+
+model OtpCode {
+  id        String   @id @default(uuid())
+  phone     String
+  code      String
+  purpose   String   // "register" | "login" | "recovery"
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Incident {
+  id            String          @id // e.g. "INC-XXXX"
+  category      String          // "fire" | "medical" | "police" | "accident"
+  severity      String          // "critical" | "high" | "moderate" | "low"
+  status        String          // "pending" | "validated" | "dispatched" | "on_scene" | "resolved"
+  reporterId    String
+  reporterName  String
+  reporterPhone String
+  description   String
+  landmark      String
+  latitude      Float
+  longitude     Float
+  photoDataUrl  String?         // Stored as base64 TEXT
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  assignedUnit  String?
+  etaMinutes    Int?
+  
+  reporter      User            @relation(fields: [reporterId], references: [id])
+  timeline      TimelineEvent[]
+}
+
+model TimelineEvent {
+  id         String   @id @default(uuid())
+  incidentId String
+  title      String
+  detail     String
+  at         DateTime @default(now())
+  
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+}

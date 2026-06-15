@@ -44,6 +44,7 @@ export default function CitizenPage() {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [devOtp, setDevOtp] = useState<string | null>(null);
   const [activeReport, setActiveReport] = useState<IncidentReport | null>(null);
   const [online, setOnline] = useState(true);
   const [queueCount, setQueueCount] = useState(0);
@@ -90,7 +91,7 @@ export default function CitizenPage() {
     return () => clearInterval(timer);
   }, [activeReport?.id]);
 
-  function handleVerify() {
+  async function handleVerify() {
     if (authMethod === "google") {
       const s = createCitizenSession({
         name: name || "Google User",
@@ -106,18 +107,47 @@ export default function CitizenPage() {
         setError("Enter your phone number first.");
         return;
       }
-      setOtpSent(true);
       setError(null);
+      setDevOtp(null);
+      try {
+        const res = await fetch("/api/auth/otp/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone, purpose: "login" }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error ?? "Failed to send OTP.");
+          return;
+        }
+        setOtpSent(true);
+        if (data.code) {
+          setDevOtp(data.code);
+        }
+      } catch (err) {
+        setError("Network error. Please try again.");
+      }
       return;
     }
-    if (!verifyOtp(otp)) {
-      setError(`Invalid OTP. Demo code: ${DEMO_OTP}`);
-      return;
+    // Verify OTP
+    try {
+      const res = await fetch("/api/auth/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code: otp, name }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Invalid OTP.");
+        return;
+      }
+      saveSession(data.session);
+      setSession(data.session);
+      setError(null);
+      setDevOtp(null);
+    } catch (err) {
+      setError("Network error. Please try again.");
     }
-    const s = createCitizenSession({ name, phone, authMethod: "phone" });
-    saveSession(s);
-    setSession(s);
-    setError(null);
   }
 
   function captureGps() {
@@ -241,14 +271,21 @@ export default function CitizenPage() {
                 />
               </label>
               {otpSent ? (
-                <label className="mt-3 block">
-                  <span className="text-xs text-slate-400 uppercase">OTP</span>
-                  <input
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-[#3d4f6f] bg-[#0a0f1a] px-3 py-2 text-white"
-                  />
-                </label>
+                <div className="mt-3">
+                  <label className="block">
+                    <span className="text-xs text-slate-400 uppercase">OTP</span>
+                    <input
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-[#3d4f6f] bg-[#0a0f1a] px-3 py-2 text-white"
+                    />
+                  </label>
+                  {devOtp ? (
+                    <p className="mt-1.5 text-xs text-emerald-400">
+                      Demo Mode OTP: <strong className="font-mono text-sm underline">{devOtp}</strong>
+                    </p>
+                  ) : null}
+                </div>
               ) : null}
             </>
           ) : null}
