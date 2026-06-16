@@ -1,7 +1,7 @@
 "use client";
 
 import { AppShell } from "@/components/AppShell";
-import { StaffLogin } from "@/components/StaffLogin";
+import { useRouter } from "next/navigation";
 import { updateIncidentStatus } from "@/lib/api-client";
 import { clearSession, loadSession, requireRole } from "@/lib/auth";
 import { CATEGORY_META } from "@/lib/constants";
@@ -59,7 +59,9 @@ const Map = dynamic(
 );
 
 export default function DispatcherPage() {
+  const router = useRouter();
   const [authed, setAuthed] = useState(false);
+  const [loadingSession, setLoadingSession] = useState(true);
   const { incidents, loading, online, refresh } = useIncidents();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -123,8 +125,13 @@ export default function DispatcherPage() {
 
   useEffect(() => {
     const session = loadSession();
-    setAuthed(requireRole(session, "dispatcher"));
-  }, []);
+    if (!requireRole(session, "dispatcher")) {
+      router.replace("/login/staff?role=dispatcher");
+    } else {
+      setAuthed(true);
+      setLoadingSession(false);
+    }
+  }, [router]);
 
   const selected =
     incidents.find((i) => i.id === selectedId) ?? incidents[0] ?? null;
@@ -153,10 +160,12 @@ export default function DispatcherPage() {
     }
   }
 
-  if (!authed) {
+  if (loadingSession || !authed) {
     return (
       <AppShell role="Command">
-        <StaffLogin role="dispatcher" onSuccess={() => setAuthed(true)} />
+        <div className="flex h-64 items-center justify-center text-slate-400">
+          Verifying credentials and authorizing access…
+        </div>
       </AppShell>
     );
   }
@@ -202,7 +211,7 @@ export default function DispatcherPage() {
           type="button"
           onClick={() => {
             clearSession();
-            setAuthed(false);
+            router.replace("/login/staff?role=dispatcher");
           }}
           className="text-xs text-slate-500 hover:text-red-300"
         >

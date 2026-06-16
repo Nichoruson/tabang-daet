@@ -72,3 +72,126 @@ a {
 .pulse-alert {
   animation: pulse-alert 1.5s ease-in-out infinite;
 }
+
+/* SOS Beacon Pulse Animation */
+@keyframes sos-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.sos-beacon-1 {
+  animation: sos-pulse 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+.sos-beacon-2 {
+  animation: sos-pulse 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  animation-delay: 1s;
+}
+.sos-beacon-3 {
+  animation: sos-pulse 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  animation-delay: 2s;
+}
+
+/* Radar Sweep Animation */
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-sweep-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(59, 130, 246, 0.08) 0deg,
+    rgba(59, 130, 246, 0.01) 120deg,
+    transparent 240deg,
+    rgba(59, 130, 246, 0.08) 360deg
+  );
+  animation: radar-sweep 10s linear infinite;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.radar-sweep-bg-amber {
+  background: conic-gradient(
+    from 0deg,
+    rgba(245, 158, 11, 0.08) 0deg,
+    rgba(245, 158, 11, 0.01) 120deg,
+    transparent 240deg,
+    rgba(245, 158, 11, 0.08) 360deg
+  );
+}
+
+/* Cyber Scanning Line */
+@keyframes cyber-scan {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+.cyber-scanner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+  animation: cyber-scan 6s linear infinite;
+  pointer-events: none;
+}
+
+.cyber-scanner-amber {
+  background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.4), transparent);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+/* Grid overlay */
+.cyber-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+}
+
+/* Form switch transitions */
+.fade-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom glowing focus */
+.glow-focus-red:focus-within {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25) !important;
+}
+.glow-focus-blue:focus-within {
+  border-color: rgba(59, 130, 246, 0.6) !important;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25) !important;
+}
+.glow-focus-amber:focus-within {
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25) !important;
+}
+

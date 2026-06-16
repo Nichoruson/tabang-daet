@@ -19,6 +19,7 @@ import { getCitizenDemoStateLabel } from "@/lib/citizen";
 import type { AuthMethod, EmergencyCategory, IncidentReport } from "@/lib/types";
 import dynamic from "next/dynamic";
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Map = dynamic(
   () => import("@/components/EmergencyMap").then((m) => m.EmergencyMap),
@@ -30,12 +31,24 @@ const Map = dynamic(
 );
 
 export default function CitizenPage() {
-  const [session, setSession] = useState(loadSession());
+  const router = useRouter();
+  const [session, setSession] = useState<any>(null);
+  const [loadingSession, setLoadingSession] = useState(true);
   const [authMethod, setAuthMethod] = useState<AuthMethod>("phone");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+
+  useEffect(() => {
+    const s = loadSession();
+    if (!s || s.role !== "citizen") {
+      router.replace("/login");
+    } else {
+      setSession(s);
+      setLoadingSession(false);
+    }
+  }, [router]);
   const [category, setCategory] = useState<EmergencyCategory>("medical");
   const [description, setDescription] = useState("");
   const [landmark, setLandmark] = useState("");
@@ -225,81 +238,11 @@ export default function CitizenPage() {
     }
   }
 
-  if (!session || session.role !== "citizen") {
+  if (loadingSession || !session || session.role !== "citizen") {
     return (
       <AppShell role="Citizen" online={online}>
-        <div className="max-w-lg mx-auto">
-          <h1 className="text-2xl font-bold text-white">Citizen sign-in</h1>
-          <p className="mt-2 text-slate-400 text-sm">
-            Verified accounts reduce false reports. Demo OTP: <strong className="text-red-300">{DEMO_OTP}</strong>
-          </p>
-
-          <div className="mt-6 flex gap-2">
-            {(["phone", "google"] as AuthMethod[]).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setAuthMethod(m)}
-                className={`flex-1 rounded-lg py-2 text-sm font-semibold ${
-                  authMethod === m
-                    ? "bg-red-700 text-white"
-                    : "bg-[#1a2332] text-slate-400"
-                }`}
-              >
-                {m === "phone" ? "Phone OTP" : "Google"}
-              </button>
-            ))}
-          </div>
-
-          <label className="mt-4 block">
-            <span className="text-xs text-slate-400 uppercase">Full name</span>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-[#3d4f6f] bg-[#0a0f1a] px-3 py-2 text-white"
-            />
-          </label>
-
-          {authMethod === "phone" ? (
-            <>
-              <label className="mt-3 block">
-                <span className="text-xs text-slate-400 uppercase">Phone</span>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+63 9XX XXX XXXX"
-                  className="mt-1 w-full rounded-lg border border-[#3d4f6f] bg-[#0a0f1a] px-3 py-2 text-white"
-                />
-              </label>
-              {otpSent ? (
-                <div className="mt-3">
-                  <label className="block">
-                    <span className="text-xs text-slate-400 uppercase">OTP</span>
-                    <input
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-[#3d4f6f] bg-[#0a0f1a] px-3 py-2 text-white"
-                    />
-                  </label>
-                  {devOtp ? (
-                    <p className="mt-1.5 text-xs text-emerald-400">
-                      Demo Mode OTP: <strong className="font-mono text-sm underline">{devOtp}</strong>
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-            </>
-          ) : null}
-
-          {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
-
-          <button
-            type="button"
-            onClick={handleVerify}
-            className="mt-5 w-full rounded-lg bg-red-700 py-3 font-bold text-white"
-          >
-            {authMethod === "phone" && !otpSent ? "Send OTP" : "Continue"}
-          </button>
+        <div className="flex h-64 items-center justify-center text-slate-400">
+          Authenticating and establishing secure reporter link…
         </div>
       </AppShell>
     );
@@ -319,11 +262,7 @@ export default function CitizenPage() {
           type="button"
           onClick={() => {
             clearSession();
-            setSession(null);
-            setOtpSent(false);
-            setOtp("");
-            setDevOtp(null);
-            setActiveReport(null);
+            router.replace("/login");
           }}
           className="text-xs text-slate-500 hover:text-red-300"
         >

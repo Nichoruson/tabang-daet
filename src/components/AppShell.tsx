@@ -1,14 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/citizen", label: "Report" },
-  { href: "/dispatcher", label: "Command" },
-  { href: "/responder", label: "Field" },
-];
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { loadSession, clearSession } from "@/lib/auth";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -19,6 +14,27 @@ type AppShellProps = {
 
 export function AppShell({ children, role, badge, online = true }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    setSession(loadSession());
+  }, [pathname]);
+
+  const navItems = [
+    { href: "/", label: "Home" },
+  ];
+
+  if (!session) {
+    navItems.push({ href: "/citizen", label: "Report" });
+    navItems.push({ href: "/login/staff", label: "Staff Portal" });
+  } else if (session.role === "citizen") {
+    navItems.push({ href: "/citizen", label: "Report Dashboard" });
+  } else if (session.role === "dispatcher") {
+    navItems.push({ href: "/dispatcher", label: "Command Board" });
+  } else if (session.role === "responder") {
+    navItems.push({ href: "/responder", label: "Field Board" });
+  }
 
   return (
     <div className="emergency-grid-bg flex min-h-screen flex-col">
@@ -39,7 +55,7 @@ export function AppShell({ children, role, badge, online = true }: AppShellProps
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex">
-            {NAV.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -77,11 +93,23 @@ export function AppShell({ children, role, badge, online = true }: AppShellProps
                 {badge}
               </span>
             ) : null}
+            {session ? (
+              <button
+                type="button"
+                onClick={() => {
+                  clearSession();
+                  router.replace("/");
+                }}
+                className="rounded-full border border-red-500/30 bg-red-950/40 px-3 py-1 text-xs font-bold text-red-300 hover:bg-red-900/40 transition cursor-pointer"
+              >
+                Sign Out
+              </button>
+            ) : null}
           </div>
         </div>
 
         <nav className="flex border-t border-white/5 md:hidden">
-          {NAV.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}

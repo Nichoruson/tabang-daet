@@ -1,7 +1,7 @@
 "use client";
 
 import { AppShell } from "@/components/AppShell";
-import { StaffLogin } from "@/components/StaffLogin";
+import { useRouter } from "next/navigation";
 import { updateIncidentStatus } from "@/lib/api-client";
 import { clearSession, loadSession, requireRole } from "@/lib/auth";
 import { CATEGORY_META } from "@/lib/constants";
@@ -67,7 +67,9 @@ const STAGE_STATUS: Record<number, IncidentStatus> = {
 };
 
 export default function ResponderPage() {
+  const router = useRouter();
   const [authed, setAuthed] = useState(false);
+  const [loadingSession, setLoadingSession] = useState(true);
   const { incidents, online, refresh } = useIncidents();
   const [currentStage, setCurrentStage] = useState(1);
   const [busy, setBusy] = useState(false);
@@ -84,8 +86,14 @@ export default function ResponderPage() {
   }, [authed]);
 
   useEffect(() => {
-    setAuthed(requireRole(loadSession(), "responder"));
-  }, []);
+    const session = loadSession();
+    if (!requireRole(session, "responder")) {
+      router.replace("/login/staff?role=responder");
+    } else {
+      setAuthed(true);
+      setLoadingSession(false);
+    }
+  }, [router]);
 
   const assignment = useMemo(
     () =>
@@ -159,10 +167,12 @@ export default function ResponderPage() {
     visibleTimeline.length,
   );
 
-  if (!authed) {
+  if (loadingSession || !authed) {
     return (
       <AppShell role="Field">
-        <StaffLogin role="responder" onSuccess={() => setAuthed(true)} />
+        <div className="flex h-64 items-center justify-center text-slate-400">
+          Verifying credentials and authorizing access…
+        </div>
       </AppShell>
     );
   }
@@ -195,7 +205,7 @@ export default function ResponderPage() {
           type="button"
           onClick={() => {
             clearSession();
-            setAuthed(false);
+            router.replace("/login/staff?role=responder");
           }}
           className="text-xs text-slate-500 hover:text-red-300"
         >
