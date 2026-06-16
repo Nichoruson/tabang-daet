@@ -72,9 +72,10 @@ a {
 .emergency-grid-bg {
   background-color: var(--bg-base);
   background-image:
-    linear-gradient(rgba(220, 38, 38, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(220, 38, 38, 0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
+    linear-gradient(rgba(239, 68, 68, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239, 68, 68, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
+  animation: grid-move 45s linear infinite;
 }
 
 @keyframes pulse-alert {
@@ -212,4 +213,45 @@ a {
   border-color: rgba(245, 158, 11, 0.6) !important;
   box-shadow: 0 0 12px rgba(245, 158, 11, 0.25) !important;
 }
+
+/* Background idle animations */
+@keyframes grid-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 32px 32px;
+  }
+}
+
+@keyframes float-glow-red {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.08;
+  }
+  50% {
+    transform: translate(80px, 40px) scale(1.25);
+    opacity: 0.16;
+  }
+}
+
+@keyframes float-glow-blue {
+  0%, 100% {
+    transform: translate(0, 0) scale(1.2);
+    opacity: 0.12;
+  }
+  50% {
+    transform: translate(-70px, -40px) scale(0.9);
+    opacity: 0.06;
+  }
+}
+
+.animate-glow-red {
+  animation: float-glow-red 25s ease-in-out infinite;
+}
+
+.animate-glow-blue {
+  animation: float-glow-blue 30s ease-in-out infinite;
+}
+
 

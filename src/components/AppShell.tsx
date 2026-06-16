@@ -38,7 +38,13 @@ export function AppShell({ children, role, badge, online = true }: AppShellProps
   }
 
   return (
-    <div className="emergency-grid-bg flex min-h-screen flex-col font-sans text-slate-100 bg-[#070a13]">
+    <div className="emergency-grid-bg flex min-h-screen flex-col font-sans text-slate-100 bg-[#070a13] relative overflow-hidden">
+      {/* Floating Background Glow Orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] rounded-full bg-red-600/20 blur-[150px] animate-glow-red" />
+        <div className="absolute bottom-[-20%] right-[-20%] w-[60vw] h-[60vw] rounded-full bg-blue-600/20 blur-[150px] animate-glow-blue" />
+      </div>
+
       <header className="sticky top-0 z-50 border-b border-white/5 bg-[#070a13]/80 backdrop-blur-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 md:px-6">
           <Link href="/" className="flex items-center gap-3 group">
