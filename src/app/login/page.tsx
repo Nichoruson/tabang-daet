@@ -9,6 +9,7 @@ import {
 import { DEMO_OTP } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AlertOctagon, Phone, Globe, AlertTriangle, ArrowLeft, Sparkles, User, ShieldCheck } from "lucide-react";
 
 type AuthMethod = "phone" | "google";
 
@@ -112,10 +113,10 @@ export default function CitizenLoginPage() {
 
         <div className="relative w-full max-w-md space-y-8 fade-transition scale-100">
           <div className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-700/10 border border-red-500/30 text-3xl text-red-500 shadow-[0_0_20px_rgba(220,38,38,0.2)]">
-              🆘
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+              <AlertOctagon size={32} />
             </div>
-            <h2 className="mt-6 text-3xl font-extrabold tracking-tight text-white">
+            <h2 className="mt-6 text-3xl font-extrabold tracking-tight text-white font-heading">
               Daet Citizen Sign-In
             </h2>
             <p className="mt-2 text-sm text-slate-400">
@@ -123,9 +124,9 @@ export default function CitizenLoginPage() {
             </p>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-red-900/30 bg-[#111827]/90 p-8 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:border-red-950/60">
+          <div className="overflow-hidden rounded-3xl border border-white/5 bg-[#0d1423]/90 p-8 shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-red-500/20">
             {/* Custom Tab Selector */}
-            <div className="flex rounded-xl bg-[#0a0f1a] p-1 border border-white/5">
+            <div className="flex rounded-xl bg-[#070a13] p-1 border border-white/5">
               {(["phone", "google"] as AuthMethod[]).map((method) => (
                 <button
                   key={method}
@@ -134,13 +135,23 @@ export default function CitizenLoginPage() {
                     setAuthMethod(method);
                     setError(null);
                   }}
-                  className={`relative flex-1 rounded-lg py-2.5 text-sm font-semibold tracking-wide transition-all duration-300 ${
+                  className={`relative flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
                     authMethod === method
-                      ? "bg-red-700 text-white shadow-lg shadow-red-900/30"
-                      : "text-slate-400 hover:text-slate-200"
+                      ? "bg-red-600 text-white shadow-lg shadow-red-950/40"
+                      : "text-slate-500 hover:text-slate-300"
                   }`}
                 >
-                  {method === "phone" ? "📱 Phone OTP" : "🌐 Google Sign-In"}
+                  {method === "phone" ? (
+                    <>
+                      <Phone size={14} />
+                      <span>Phone OTP</span>
+                    </>
+                  ) : (
+                    <>
+                      <Globe size={14} />
+                      <span>Google Login</span>
+                    </>
+                  )}
                 </button>
               ))}
             </div>
@@ -148,18 +159,21 @@ export default function CitizenLoginPage() {
             <div className="mt-6 relative min-h-[180px]">
               {/* Form container with sliding animations */}
               <div className="space-y-4">
-                <div className="glow-focus-red rounded-lg border border-[#3d4f6f] bg-[#0a0f1a] px-3 py-2 transition-all duration-200">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Juan Dela Cruz"
-                    className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600 mt-0.5"
-                    required
-                  />
+                <div className="glow-focus-red rounded-xl border border-white/10 bg-[#070a13] px-3.5 py-2.5 transition-all duration-200 flex items-center gap-3">
+                  <User size={16} className="text-slate-500" />
+                  <div className="flex-1">
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Juan Dela Cruz"
+                      className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600 mt-0.5"
+                      required
+                    />
+                  </div>
                 </div>
 
                 {authMethod === "phone" ? (
@@ -172,31 +186,34 @@ export default function CitizenLoginPage() {
                           : "opacity-100 translate-x-0"
                       }`}
                     >
-                      <div className="glow-focus-red rounded-lg border border-[#3d4f6f] bg-[#0a0f1a] px-3 py-2 transition-all duration-200">
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                          Mobile Number
-                        </label>
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="+63 9XX XXX XXXX"
-                          className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600 mt-0.5"
-                          required
-                        />
+                      <div className="glow-focus-red rounded-xl border border-white/10 bg-[#070a13] px-3.5 py-2.5 transition-all duration-200 flex items-center gap-3">
+                        <Phone size={16} className="text-slate-500" />
+                        <div className="flex-1">
+                          <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                            Mobile Number
+                          </label>
+                          <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="+63 9XX XXX XXXX"
+                            className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600 mt-0.5"
+                            required
+                          />
+                        </div>
                       </div>
                     </div>
 
                     {/* Slide 2: OTP input */}
                     <div
-                      className={`fade-transition space-y-2 ${
+                      className={`fade-transition space-y-3 ${
                         !otpSent
                           ? "opacity-0 translate-x-12 pointer-events-none absolute inset-x-0"
                           : "opacity-100 translate-x-0"
                       }`}
                     >
-                      <div className="glow-focus-red rounded-lg border border-[#3d4f6f] bg-[#0a0f1a] px-3 py-2 transition-all duration-200">
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      <div className="glow-focus-red rounded-xl border border-white/10 bg-[#070a13] px-3.5 py-2.5 transition-all duration-200">
+                        <label className="block text-[9px] font-bold uppercase tracking-wider text-slate-500 text-center mb-1">
                           One-Time PIN
                         </label>
                         <input
@@ -204,24 +221,26 @@ export default function CitizenLoginPage() {
                           value={otp}
                           maxLength={6}
                           onChange={(e) => setOtp(e.target.value)}
-                          placeholder="******"
-                          className="w-full bg-transparent text-center text-lg font-mono tracking-[0.3em] text-white outline-none placeholder:text-slate-700 mt-0.5"
+                          placeholder="••••••"
+                          className="w-full bg-transparent text-center text-lg font-mono tracking-[0.3em] text-white outline-none placeholder:text-slate-800"
                           required
                         />
                       </div>
                       {devOtp && (
-                        <div className="rounded-lg bg-emerald-950/30 border border-emerald-500/20 px-3 py-2 text-center">
-                          <p className="text-xs text-emerald-400">
-                            Demo Mode Code: <strong className="font-mono text-sm underline select-all">{devOtp}</strong>
+                        <div className="rounded-xl bg-emerald-950/20 border border-emerald-500/10 px-4 py-2.5 text-center flex items-center justify-center gap-2">
+                          <ShieldCheck size={14} className="text-emerald-400" />
+                          <p className="text-xs text-emerald-400/90 font-medium">
+                            Demo Code: <strong className="font-mono text-sm underline select-all">{devOtp}</strong>
                           </p>
                         </div>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-dashed border-red-500/20 bg-red-950/10 p-5 text-center fade-transition">
-                    <p className="text-sm text-slate-300">
-                      You can click below to simulate a Google Identity sign-in instantly for local testing.
+                  <div className="rounded-xl border border-dashed border-red-500/20 bg-red-950/5 p-5 text-center fade-transition flex flex-col items-center gap-2">
+                    <Sparkles size={20} className="text-red-400/70" />
+                    <p className="text-xs text-slate-400 leading-normal max-w-[280px]">
+                      Simulates instant Google ID authentication for validation testing.
                     </p>
                   </div>
                 )}
@@ -229,8 +248,9 @@ export default function CitizenLoginPage() {
             </div>
 
             {error && (
-              <div className="mt-4 rounded-lg bg-red-950/60 border border-red-500/30 px-4 py-2.5 text-sm text-red-200">
-                ⚠️ {error}
+              <div className="mt-4 rounded-xl bg-red-950/30 border border-red-500/20 px-4 py-3 text-xs text-red-300 flex items-start gap-2 leading-relaxed">
+                <AlertTriangle size={14} className="text-red-400 shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
             )}
 
@@ -238,10 +258,10 @@ export default function CitizenLoginPage() {
               type="button"
               onClick={handleVerify}
               disabled={isLoading}
-              className="mt-6 w-full rounded-xl bg-red-700 hover:bg-red-600 py-3.5 text-sm font-bold uppercase tracking-widest text-white shadow-lg shadow-red-900/40 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60"
+              className="mt-6 w-full rounded-xl bg-red-600 hover:bg-red-500 py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg shadow-red-900/30 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 cursor-pointer"
             >
               {isLoading
-                ? "Connecting..."
+                ? "Tactical Connection..."
                 : authMethod === "phone" && !otpSent
                 ? "Send Verification PIN"
                 : "Verify & Enter Portal"}
@@ -256,9 +276,10 @@ export default function CitizenLoginPage() {
                     setOtp("");
                     setError(null);
                   }}
-                  className="text-xs text-red-400 hover:text-red-300 hover:underline"
+                  className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-red-400 hover:underline transition font-semibold"
                 >
-                  ← Change phone number
+                  <ArrowLeft size={12} />
+                  <span>Change phone number</span>
                 </button>
               </div>
             )}

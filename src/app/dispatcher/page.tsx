@@ -15,6 +15,28 @@ import { useIncidents } from "@/hooks/useIncidents";
 import type { IncidentReport, IncidentStatus } from "@/lib/types";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
+import { CategoryIcon } from "@/components/CategoryIcon";
+import {
+  Radio,
+  AlertOctagon,
+  Shield,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  User,
+  Phone,
+  MapPin,
+  Check,
+  Send,
+  LogOut,
+  Loader2,
+  Navigation,
+  Flame,
+  X,
+  ShieldAlert,
+  Activity,
+  Briefcase,
+} from "lucide-react";
 
 function playEmergencyChime() {
   if (typeof window === "undefined") return;
@@ -54,7 +76,7 @@ function playEmergencyChime() {
 const Map = dynamic(
   () => import("@/components/EmergencyMap").then((m) => m.EmergencyMap),
   { ssr: false, loading: () => (
-    <div className="h-full min-h-[280px] animate-pulse rounded-xl bg-[#111827]" />
+    <div className="h-full min-h-[280px] animate-pulse rounded-2xl border border-white/5 bg-[#0d1423]" />
   )},
 );
 
@@ -163,8 +185,9 @@ export default function DispatcherPage() {
   if (loadingSession || !authed) {
     return (
       <AppShell role="Command">
-        <div className="flex h-64 items-center justify-center text-slate-400">
-          Verifying credentials and authorizing access…
+        <div className="flex h-64 items-center justify-center text-slate-400 font-heading">
+          <Loader2 className="animate-spin text-blue-500 mr-2" size={18} />
+          <span>Verifying credentials and authorizing access…</span>
         </div>
       </AppShell>
     );
@@ -176,36 +199,39 @@ export default function DispatcherPage() {
   return (
     <AppShell role="Dispatcher" online={online}>
       {toast ? (
-        <div className="mb-4 flex items-center justify-between rounded-xl border border-red-500 bg-red-950/80 px-4 py-3 text-white animate-pulse">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🚨</span>
+        <div className="mb-5 flex items-center justify-between rounded-2xl border border-red-500/30 bg-red-950/80 px-4 py-3 text-white shadow-lg shadow-red-950/20">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">
+              <ShieldAlert size={16} className="animate-pulse" />
+            </div>
             <div>
-              <p className="text-sm font-bold">{toast.msg}</p>
+              <p className="text-sm font-bold tracking-wide">{toast.msg}</p>
               <button 
                 type="button" 
                 onClick={() => {
                   setSelectedId(toast.id);
                   setToast(null);
                 }}
-                className="text-xs text-red-300 underline font-semibold mt-0.5"
+                className="text-xs text-red-400 hover:text-red-300 underline font-bold mt-0.5 cursor-pointer"
               >
-                View Incident Details
+                Inspect Incident Telemetry
               </button>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setToast(null)}
-            className="text-slate-400 hover:text-white text-lg font-bold ml-4"
+            className="text-slate-400 hover:text-white hover:bg-white/5 rounded-lg p-1.5 transition cursor-pointer"
           >
-            &times;
+            <X size={16} />
           </button>
         </div>
       ) : null}
+
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Command dashboard</h1>
-          <p className="text-sm text-slate-400">Live incident map & triage queue</p>
+          <h1 className="text-2xl font-bold text-white font-heading tracking-tight">MDRRMO Command Dashboard</h1>
+          <p className="text-sm text-slate-400 mt-0.5">Tactical real-time emergency dispatcher console</p>
         </div>
         <button
           type="button"
@@ -213,36 +239,37 @@ export default function DispatcherPage() {
             clearSession();
             router.replace("/login/staff?role=dispatcher");
           }}
-          className="text-xs text-slate-500 hover:text-red-300"
+          className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-red-400 transition duration-200 cursor-pointer"
         >
-          Sign out
+          <LogOut size={12} />
+          <span>Exit Console</span>
         </button>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
-          { label: "Active", value: active, color: "text-red-400" },
-          { label: "Critical", value: critical, color: "text-orange-400" },
-          { label: "Total today", value: incidents.length, color: "text-blue-300" },
+          { label: "Active Operations", value: active, color: "text-red-400" },
+          { label: "Critical Priority", value: critical, color: "text-orange-400" },
+          { label: "Total Logged Today", value: incidents.length, color: "text-blue-400" },
           {
-            label: "Avg ETA",
+            label: "Average Dispatch ETA",
             value: selected?.etaMinutes ? `${selected.etaMinutes}m` : "—",
-            color: "text-emerald-300",
+            color: "text-emerald-400",
           },
         ].map((s) => (
           <div
             key={s.label}
-            className="rounded-xl border border-[#3d4f6f] bg-[#111827] px-4 py-3"
+            className="rounded-2xl border border-white/5 bg-[#0d1423]/50 px-4 py-3.5 shadow-md"
           >
-            <p className="text-xs uppercase text-slate-500">{s.label}</p>
-            <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{s.label}</p>
+            <p className={`text-2xl font-bold tracking-tight font-heading mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-[#3d4f6f] bg-[#111827] p-3">
+        <div className="space-y-5">
+          <div className="rounded-3xl border border-white/5 bg-[#0d1423] p-3 shadow-xl overflow-hidden">
             <Map
               incidents={incidents.filter((i) => i.status !== "resolved")}
               selectedId={selectedId}
@@ -251,97 +278,117 @@ export default function DispatcherPage() {
             />
           </div>
 
-          <div className="space-y-2">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-slate-400">
-              Incident queue
+          <div className="space-y-3">
+            <h2 className="text-xs font-extrabold uppercase tracking-widest text-slate-500 font-heading">
+              Incident Response Queue
             </h2>
             {loading && !incidents.length ? (
-              <p className="text-slate-500">Loading…</p>
+              <p className="text-slate-500 text-xs font-medium">Synchronizing reports feed…</p>
             ) : null}
             {!loading && !incidents.length ? (
-              <p className="rounded-xl border border-dashed border-[#3d4f6f] p-8 text-center text-slate-500">
-                No reports yet. Citizen submissions appear here in real time.
-              </p>
-            ) : null}
-            {incidents.map((incident) => (
-              <button
-                key={incident.id}
-                type="button"
-                onClick={() => setSelectedId(incident.id)}
-                className={`w-full rounded-xl border p-4 text-left transition ${
-                  selected?.id === incident.id
-                    ? "border-red-500/50 bg-red-950/30"
-                    : "border-[#3d4f6f] bg-[#111827] hover:border-red-500/30"
-                }`}
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-sm text-white">{incident.id}</span>
-                  <span className="rounded px-2 py-0.5 text-xs font-bold uppercase bg-[#1a2332] text-slate-200">
-                    {CATEGORY_META[incident.category].icon}{" "}
-                    {incident.category}
-                  </span>
-                  <span
-                    className={`rounded border px-2 py-0.5 text-xs ${severityAccent(incident.severity)}`}
-                  >
-                    {incident.severity}
-                  </span>
-                  <span
-                    className={`rounded px-2 py-0.5 text-xs ${statusAccent(incident.status)}`}
-                  >
-                    {incident.status.replace("_", " ")}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-slate-300">{incident.description}</p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {incident.reporterName} · {incident.landmark || "GPS pin only"}
+              <div className="rounded-2xl border border-dashed border-white/5 p-12 text-center bg-[#0d1423]/30">
+                <p className="text-sm font-medium text-slate-500">
+                  No active incident signals detected. Citizen logs will appear here instantly.
                 </p>
-              </button>
-            ))}
+              </div>
+            ) : null}
+            <div className="space-y-2.5">
+              {incidents.map((incident) => (
+                <button
+                  key={incident.id}
+                  type="button"
+                  onClick={() => setSelectedId(incident.id)}
+                  className={`w-full rounded-2xl border p-5 text-left transition-all duration-300 cursor-pointer ${
+                    selected?.id === incident.id
+                      ? "border-red-500/40 bg-red-950/10 shadow-lg"
+                      : "border-white/5 bg-[#0d1423] hover:border-white/10 hover:bg-[#111a2e]/60"
+                  }`}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-slate-400 bg-slate-900 border border-white/5 px-2 py-0.5 rounded-md">{incident.id}</span>
+                    <span className="flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold uppercase bg-[#070a13] text-slate-300 border border-white/5">
+                      <CategoryIcon category={incident.category} size={12} />
+                      <span>{incident.category}</span>
+                    </span>
+                    <span
+                      className={`rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${severityAccent(incident.severity)}`}
+                    >
+                      {incident.severity}
+                    </span>
+                    <span
+                      className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusAccent(incident.status)}`}
+                    >
+                      {incident.status.replace("_", " ")}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-slate-200 leading-snug">{incident.description}</p>
+                  <p className="mt-2 text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                    <User size={12} className="text-slate-600" />
+                    <span>{incident.reporterName}</span>
+                    <span className="text-slate-800">·</span>
+                    <MapPin size={12} className="text-slate-600" />
+                    <span className="truncate max-w-[200px]">{incident.landmark || "GPS Telemetry"}</span>
+                  </p>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {selected ? (
-          <aside className="rounded-2xl border border-red-900/30 bg-[#111827] p-5 lg:sticky lg:top-24 lg:self-start">
-            <p className="font-mono text-red-300">{selected.id}</p>
-            <h2 className="mt-2 text-xl font-bold capitalize text-white">
-              {selected.category} emergency
-            </h2>
+          <aside className="rounded-3xl border border-white/5 bg-[#0d1423] p-6 shadow-2xl lg:sticky lg:top-24 lg:self-start space-y-5">
+            <div>
+              <p className="font-mono text-xs font-bold text-red-400 bg-red-950/20 border border-red-500/10 px-2.5 py-1 rounded-md inline-block">{selected.id}</p>
+              <h2 className="mt-3 text-xl font-bold capitalize text-white font-heading tracking-tight flex items-center gap-2">
+                <CategoryIcon category={selected.category} size={20} />
+                <span>{selected.category} Incident</span>
+              </h2>
+            </div>
 
             {selected.photoDataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={selected.photoDataUrl}
-                alt="Evidence"
-                className="mt-4 w-full rounded-lg border border-white/10 object-cover max-h-48"
-              />
+              <div className="relative rounded-2xl overflow-hidden border border-white/5 shadow-md">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={selected.photoDataUrl}
+                  alt="Evidence Logs"
+                  className="w-full object-cover max-h-48"
+                />
+              </div>
             ) : null}
 
-            <dl className="mt-4 space-y-2 text-sm">
-              <div>
-                <dt className="text-slate-500">Reporter</dt>
-                <dd className="text-white">{selected.reporterName}</dd>
+            <div className="border-t border-b border-white/5 py-4 space-y-3.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 font-semibold uppercase tracking-wider">Reporter Name</span>
+                <span className="text-white font-bold flex items-center gap-1">
+                  <User size={12} className="text-slate-400" />
+                  {selected.reporterName}
+                </span>
               </div>
-              <div>
-                <dt className="text-slate-500">Phone</dt>
-                <dd className="text-white">{selected.reporterPhone}</dd>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 font-semibold uppercase tracking-wider">Contact Phone</span>
+                <span className="text-white font-bold flex items-center gap-1">
+                  <Phone size={12} className="text-slate-400" />
+                  {selected.reporterPhone}
+                </span>
               </div>
-              <div>
-                <dt className="text-slate-500">Coordinates</dt>
-                <dd className="font-mono text-xs text-slate-300">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 font-semibold uppercase tracking-wider">GPS Marker</span>
+                <span className="font-mono text-slate-300 font-medium flex items-center gap-1">
+                  <MapPin size={12} className="text-slate-400" />
                   {selected.latitude.toFixed(5)}, {selected.longitude.toFixed(5)}
-                </dd>
+                </span>
               </div>
-            </dl>
+            </div>
 
-            <div className="mt-5 grid gap-2">
+            <div className="grid gap-2">
               {selected.status === "pending" ? (
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => patchStatus(selected, "validated")}
-                  className="rounded-lg bg-amber-700 py-2 text-sm font-bold text-white"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-amber-950/20 hover:shadow-lg transition duration-200 cursor-pointer disabled:opacity-50"
                 >
-                  Validate report
+                  Validate Incident Signal
                 </button>
               ) : null}
               {selected.status === "validated" || selected.status === "pending" ? (
@@ -349,9 +396,9 @@ export default function DispatcherPage() {
                   type="button"
                   disabled={busy}
                   onClick={() => patchStatus(selected, "dispatched", true)}
-                  className="rounded-lg bg-red-700 py-2 text-sm font-bold text-white"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-red-950/20 hover:shadow-lg transition duration-200 cursor-pointer disabled:opacity-50"
                 >
-                  Dispatch nearest unit
+                  Dispatch Field Unit
                 </button>
               ) : null}
               {selected.status === "dispatched" ? (
@@ -359,9 +406,9 @@ export default function DispatcherPage() {
                   type="button"
                   disabled={busy}
                   onClick={() => patchStatus(selected, "on_scene")}
-                  className="rounded-lg bg-blue-800 py-2 text-sm font-bold text-white"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-blue-950/20 hover:shadow-lg transition duration-200 cursor-pointer disabled:opacity-50"
                 >
-                  Mark on scene
+                  Mark Team On Scene
                 </button>
               ) : null}
               {selected.status !== "resolved" ? (
@@ -369,9 +416,9 @@ export default function DispatcherPage() {
                   type="button"
                   disabled={busy}
                   onClick={() => patchStatus(selected, "resolved")}
-                  className="rounded-lg border border-[#3d4f6f] py-2 text-sm text-slate-300"
+                  className="w-full py-3 rounded-xl border border-white/10 bg-[#070a13] hover:border-slate-800 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white transition duration-200 cursor-pointer disabled:opacity-50"
                 >
-                  Close incident
+                  Close & Resolve Case
                 </button>
               ) : null}
             </div>
